@@ -1,0 +1,34 @@
+# server
+
+# mysql
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: "root"
+  password: "root"
+  dbName: "pool"
+
+Logger:
+  ConfPath: "./log.yml"
+
+# redis
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  dbName: ""
+  poolSize: 100
+
+
+# 支付宝
+alipay:
+  app_id: "9021000122675691"
+  private_key: "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCBHhSFIh3DJ0P5QzVwpQJ/roHh0KDKqo/z0Pm79pM//l+SBT5tWivOt7PsSnehT90cBx5aAqb9Fpw+mMyqPrIZ8bShvcdsNwNg9YWTvSdGY6xAVBHYU5oX/ptlWlLCsFhektdj2YAFkF6mheI6gPaEGBUGCi/+ZWiJIZtpWlEnCW2RKSCT99oP7ABG9a5i5O0La+s+W8RiinkY2zjBTT1j9q7YMzO6CZxtZa/izuFdDOgJtJe9EpdSgm2jbIm5F58MZzknx/NMPnzCyEQpCqnD01g+/eIqvFPUm0+j5OiTttiNuQfAE4zVB5dvnNx2AAkjw8/Jcq3L47smNMoV5QqpAgMBAAECggEAKLkSA8N0255AxBc8faCtnxOtB0nDzOfqqx2YBn6IhsB16BobTGYKNxKdfsMl5AzKUhK0sfLwNBazhNKwimlnxuMC85hlk23udOA7FxOrlXnOVCOv1SjZCwRUgqzwOVNhK8LoiCeLRzX3hFHpvkX6ekMWLmd8J6JYTBf7akkAG21cnHMOFIaSwpNqy6r8mH6ZrtR6trHDOdMU/RdkSKjKc1V7ewWDDsgG67JPeQJtc3jJE3VZTzv6wBiXha8GDvEkSL1Mr0Xy51qbvu/e2RBW/LxKEhPAEJXEMSXbZc4GvoxwjQ2bicy9zNOEvqmVVY3EuPrQtJsY3/F7cEGbuhgveQKBgQDH3exwD0clFXXyEwJWZmkHrVNBWOZb6ZOLSRblbgQSP8WY/EZlkEiSLqzEaCY4TVOhUPXoMAf69ySanRwVNu7rmWDSDG/EE+PkdMMV3wdsqOxDliRcKV67mA1cC5gtWwDHWdSKhastag1W+IOr+YzZegESVhZP81UazpyzCvIY4wKBgQClYWaFE5sww/1CTlVhgSNqJJPzWaZUiaGPjw/7PeusCz+9P/WltbE3LnuMsSeNa0vVsTWfaxcesl4Z/OUUWdfPo6dw4kp1poNUCzHrICLk9ZuSNxUYEi/I8r0bdFDWHWZX1C2z2pF/B66oknckjr3QvAWl82zYXwe18eybK7JAAwKBgFO5DfsfG0FYjRC7j8YbnjGeFHsSP2UPIkQ9eL7g6Amw9xgPzXlsCEpcDPk1W5VIJxkzLd92h1FEx+uQlpv4Z/r/RASZOxRa9KLVmocF5zlIRbhGI7MLjWht2GLPZI7TSS843QSt27fpbe8ZqSaYIb1UEzDYKP6Swvq4xAFoO2PbAoGATS9vRK7I4HKocdjTeoVl/PUDZDE0MwJlN/ZCNDVLF+nMHsyKHoP1KNb17M0Fs7gfFaX2a+f0S2xeBO0GEYB4+7zauhGzRMOpSYFME/vUrV1/9TbmDmz2hmfcIMMhszzXdiheCDH7c/km6CAroRFJv/DxBendpAJ+O8mkbyturvcCgYBY526O5UaCQSbhibO9CfGgmcWSAfihNJGG+hgKu2WQYuo+x9nKsQbaHRAlJx/jf6xULnc0ly6/Io8UU/qdOAAVlbxe1BhHjdqTV+oavpnlsL5EfK6Ymo2koUObWBnCTec+i/mhMlRJi0NwpLIBh0DfgyxPkP7PLxxjoRUuYJ6AKQ=="
+  public_key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgR4UhSIdwydD+UM1cKUCf66B4dCgyqqP89D5u/aTP/5fkgU+bVorzrez7Ep3oU/dHAceWgKm/RacPpjMqj6yGfG0ob3HbDcDYPWFk70nRmOsQFQR2FOaF/6bZVpSwrBYXpLXY9mABZBepoXiOoD2hBgVBgov/mVoiSGbaVpRJwltkSkgk/faD+wARvWuYuTtC2vrPlvEYop5GNs4wU09Y/au2DMzugmcbWWv4s7hXQzoCbSXvRKXUoJto2yJuRefDGc5J8fzTD58wshEKQqpw9NYPv3iKrxT1JtPo+Tok7bYjbkHwBOM1QeXb5zcdgAJI8PPyXKty+O7JjTKFeUKqQIDAQAB"
+  notify_url: ""
+  return_url: ""
+
+# sms
+sms:
+  key: "LTAI5tEbEjuMiujymkb7tmLE"
+  secret: "YJXZNOAWvifQbitrvLGqom3EGcmuOO"
