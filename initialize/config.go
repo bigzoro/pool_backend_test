@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 	"pool/global"
 )
 
@@ -13,20 +14,13 @@ func GetEnvInfo(env string) bool {
 }
 
 func InitConfig() {
-	//confFilePrefix := "config"
-
-	//debug := GetEnvInfo("MXSHOP_DEBUG")
-	//configFileName := fmt.Sprintf("meihua/%s-pro.yaml", confFilePrefix)
-	//if debug {
-	//	configFileName = fmt.Sprintf("user-web/%s-debug.yaml", confFilePrefix)
-	//}
-
 	currDir, err := os.Getwd()
+
 	if err != nil {
 		panic(err)
 	}
-	configFileName := currDir + "\\config\\config.yaml"
-	//configFileName := fmt.Sprintf("\\%s\\%s.yaml", currDir, confFilePrefix)
+	configDir := filepath.Join(currDir, "config")
+	configFileName := filepath.Join(configDir, "config.yaml")
 	v := viper.New()
 
 	v.SetConfigFile(configFileName)
