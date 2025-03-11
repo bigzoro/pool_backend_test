@@ -20,6 +20,7 @@ func InitPoolRouter(Router *gin.RouterGroup) {
 
 		// 池子
 		poolRouter.POST("purchase_pool", api.PurchasePool)
+		poolRouter.OPTIONS("purchase_pool", api.PurchasePool)
 		poolRouter.POST("getPurchaseByUserId", api.GetPurchaseByUserId)
 
 		// 购买
