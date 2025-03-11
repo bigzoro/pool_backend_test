@@ -13,3 +13,8 @@ type Purchase struct {
 	// 区块号
 	BlockNumber uint64 `json:"block_number"`
 }
+
+type PurchaseSummary struct {
+	PoolName   string  `json:"pool_name"`
+	TotalCount float64 `json:"total_count"`
+}

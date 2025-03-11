@@ -25,6 +25,12 @@ func InitPoolRouter(Router *gin.RouterGroup) {
 		// 购买
 		poolRouter.GET("get_all_purchases", api.GetAllPurchases)
 
+		// 方案
+		poolRouter.POST("add_plan", api.AddPlan)
+		poolRouter.POST("get_user_plan", api.GetUserPlan)
+		poolRouter.POST("get_plan_detail", api.GetUserPlanDetails)
+		poolRouter.POST("delete_plan", api.DeletePlan)
+
 		// 区块
 		poolRouter.POST("get_block_page", api.GetBlocksByPage)
 		poolRouter.GET("block_info", api.BlockInfo)

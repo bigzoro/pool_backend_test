@@ -30,7 +30,6 @@ func BatchAddPurchase(purchases []models.Purchase) error {
 		return nil // 没有数据可插入，直接返回
 	}
 
-	// 这里假设 db 是你的数据库连接实例
 	err := global.GormDB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&purchases).Error; err != nil {
 			return err
@@ -82,4 +81,19 @@ func GetOtherPurchaseByBlockNumber(blockNumber int, poolName string) ([]*models.
 	}
 
 	return purchases, nil
+}
+
+func GetPoolCount() (map[string]float64, error) {
+	var poolCountMap []*models.PurchaseSummary
+	result := global.GormDB.Model(&models.Purchase{}).Select("pool_name, SUM(count) as total_count").Group("pool_name").Find(&poolCountMap)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var data = make(map[string]float64)
+	for _, purchase := range poolCountMap {
+		data[purchase.PoolName] = purchase.TotalCount
+	}
+
+	return data, nil
 }

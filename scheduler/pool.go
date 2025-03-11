@@ -78,13 +78,13 @@ func savePoolInfo(pools []*models.Pool) error {
 	// todo: 过滤掉第一个
 	// radio, 0.38
 	//for _, pool := range pools {
-	//	pool.Price =
+	//	pool.Price = pool.Ratio / (1 - pool.Profit)
 	//}
 
 	// 批量插入
 	result := global.GormDB.Model(&models.Pool{}).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "pool_name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"fee_reward_radio", "hashps", "ratio"}),
+		DoUpdates: clause.AssignmentColumns([]string{"fee_reward_ratio", "hashps", "ratio"}),
 	}).Create(&pools)
 	if result.Error != nil {
 		return fmt.Errorf("❌ 数据库写入失败: %v", result.Error)

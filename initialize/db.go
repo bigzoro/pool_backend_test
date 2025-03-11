@@ -50,6 +50,8 @@ func InitDB() {
 		&models.Purchase{},
 		&models.Block{},
 		&models.GoogleAuth{},
+		&models.Plan{},
+		&models.PlanDetail{},
 	)
 	if err != nil {
 		panic(err)

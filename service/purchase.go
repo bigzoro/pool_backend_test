@@ -58,12 +58,17 @@ func AllPoolPurchaseNumber(poolName string) (map[string]float64, error) {
 		// 风险金需要动态变化
 		// 风险金怎么计算：
 		// 基本风险金 + 用户已经买入的金额
-		purchases, err := dao.GetOtherPurchaseByBlockNumber(10, pool.PoolName)
+		poolCount, err := dao.GetPoolCount()
 		if err != nil {
 			return nil, err
 		}
-		for _, purchase := range purchases {
-			total += purchase.Count
+
+		for k, v := range poolCount {
+			if k == pool.PoolName {
+				total -= v / pool.Price
+			} else {
+				total += v
+			}
 		}
 
 		availableNumber[pool.PoolName] = pool.Price * total
@@ -75,11 +80,13 @@ func AllPoolPurchaseNumber(poolName string) (map[string]float64, error) {
 // 定义一个全局的互斥锁
 var purchaseLock sync.Mutex
 
-func AddPurchase(purchaseParam forms.PurchasesForm) error {
+func AddPurchase(purchaseParam forms.PurchasesForm) (map[string][]string, error) {
 	iUserId, err := strconv.Atoi(purchaseParam.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	purchaseResult := make(map[string][]string)
 
 	// 买入的时候需要加锁
 	purchaseLock.Lock()
@@ -91,12 +98,12 @@ func AddPurchase(purchaseParam forms.PurchasesForm) error {
 		// 获取所有可以购买的数量
 		poolPurchaseNumber, err := AllPoolPurchaseNumber(pool.PoolName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		availableCount, exists := poolPurchaseNumber[pool.PoolName]
 		if !exists {
-			return fmt.Errorf("pool %s not found", pool.PoolName)
+			return nil, fmt.Errorf("pool %s not found", pool.PoolName)
 		}
 		if availableCount >= float64(pool.Count) {
 			purchasesToSave = append(purchasesToSave, models.Purchase{
@@ -106,8 +113,11 @@ func AddPurchase(purchaseParam forms.PurchasesForm) error {
 				Price:       float64(pool.Price),
 				BlockNumber: uint64(pool.BlockNumber),
 			})
+			// 计入买入成功
+			purchaseResult["success"] = append(purchaseResult["success"], pool.PoolName)
 		} else {
-			return fmt.Errorf("insufficient balance in pool %s", pool.PoolName)
+			// 计入买入失败
+			purchaseResult["fail"] = append(purchaseResult["fail"], pool.PoolName)
 		}
 	}
 
@@ -115,11 +125,11 @@ func AddPurchase(purchaseParam forms.PurchasesForm) error {
 	if len(purchasesToSave) > 0 {
 		err = dao.BatchAddPurchase(purchasesToSave)
 		if err != nil {
-			return fmt.Errorf("failed to save purchases: %w", err)
+			return nil, fmt.Errorf("failed to save purchases: %w", err)
 		}
 	}
 
-	return nil
+	return purchaseResult, nil
 }
 
 func GetPurchaseByUserId(userId int) ([]*models.Purchase, error) {

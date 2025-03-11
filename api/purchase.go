@@ -1,7 +1,9 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"pool/common/constant"
 	"pool/forms"
 	"pool/service"
 	"pool/utils/rsp"
@@ -11,17 +13,17 @@ func PurchasePool(ctx *gin.Context) {
 	var purchasesPoolForm forms.PurchasesForm
 	err := ctx.ShouldBind(&purchasesPoolForm)
 	if err != nil {
-		rsp.FailResponse(ctx, err)
+		rsp.FailResponse(ctx, errors.New(constant.ErrorParameter))
 		return
 	}
 
-	err = service.AddPurchase(purchasesPoolForm)
+	purchaseResult, err := service.AddPurchase(purchasesPoolForm)
 	if err != nil {
 		rsp.FailResponse(ctx, err)
 		return
 	}
 
-	rsp.SuccessResponse(ctx, nil)
+	rsp.SuccessResponse(ctx, purchaseResult)
 }
 
 func GetAllPurchases(ctx *gin.Context) {

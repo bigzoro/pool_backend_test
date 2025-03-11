@@ -23,3 +23,13 @@ type UserInfoResp struct {
 	ReferrerID *uint  `gorm:"index"`
 	InviteCode string `json:"invite_code"`
 }
+
+type UserPlansResp struct {
+	PlanId   int    `json:"plan_id"`
+	PlanName string `json:"plan_name"`
+}
+
+type UserPlanDetailsResp struct {
+	PoolName string  `json:"pool_name"`
+	Count    float64 `json:"count"`
+}
