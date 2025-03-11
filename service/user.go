@@ -135,8 +135,11 @@ func Login(loginForm *forms.EmailLoginForm) (*models.User, string, error) {
 		if user == nil {
 			return nil, "", errors.New(constant.ErrorUserNotExist)
 		}
+
+		inputPassword := utils.GenPassword(loginForm.Password, user.Salt)
+
 		// 校验密码是否正确
-		if loginForm.Password != user.Password {
+		if inputPassword != user.Password {
 			return nil, "", errors.New(constant.ErrorPassword)
 		}
 	default:
