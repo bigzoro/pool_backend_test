@@ -3,12 +3,16 @@ package scheduler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"gorm.io/gorm/clause"
+	"gorm.io/gorm"
 	"log"
+	"math/big"
 	"net/http"
 	"pool/global"
 	"pool/models"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -74,23 +78,104 @@ func savePoolInfo(pools []*models.Pool) error {
 		return nil
 	}
 
-	//
-	// todo: 过滤掉第一个
-	// radio, 0.38
-	//for _, pool := range pools {
-	//	pool.Price = pool.Ratio / (1 - pool.Profit)
-	//}
-
-	// 批量插入
-	result := global.GormDB.Model(&models.Pool{}).Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "pool_name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"fee_reward_ratio", "hashps", "ratio"}),
-	}).Create(&pools)
-	if result.Error != nil {
-		return fmt.Errorf("❌ 数据库写入失败: %v", result.Error)
+	// 过滤掉 pool_name 为 "NETWORK" 的矿池
+	var filteredPools []*models.Pool
+	for _, pool := range pools {
+		if !strings.EqualFold(pool.PoolName, "NETWORK") { // 忽略大小写比较
+			filteredPools = append(filteredPools, pool)
+		}
 	}
 
-	log.Printf("✅ 成功插入 %d 条矿池数据", result.RowsAffected)
+	// 如果过滤后没有剩余数据，直接返回
+	if len(filteredPools) == 0 {
+		log.Println("⚠️  没有需要插入的矿池数据 (所有数据被过滤)")
+		return nil
+	}
+
+	var savedPools []*models.Pool
+	// 修改数据，保存前七个，剩余的合并到一起
+	var frontRadio float64
+	if len(filteredPools) >= 7 {
+		for i := 0; i < len(filteredPools); i++ {
+			if i <= 6 {
+				savedPools = append(savedPools, filteredPools[i])
+				parseFloat, err := strconv.ParseFloat(filteredPools[i].Ratio, 64)
+				if err != nil {
+					continue
+				}
+				frontRadio += parseFloat
+			}
+		}
+	}
+
+	otherRadio := 1 - frontRadio
+
+	bigHashFloat := new(big.Float)
+	bigHashFloat.SetString(filteredPools[0].Hashps)
+	bigRadioFloat := new(big.Float)
+	bigRadioFloat.SetString(filteredPools[0].Ratio)
+	allHashBigFloat := new(big.Float).Quo(bigHashFloat, bigRadioFloat)
+	otherRadioStr := strconv.FormatFloat(otherRadio, 'f', 4, 64)
+	bigOtherRadioFloat := new(big.Float)
+	bigOtherRadioFloat.SetString(otherRadioStr)
+	bigOtherHashFloat := new(big.Float).Mul(allHashBigFloat, bigOtherRadioFloat)
+
+	// 计算全部的 hash
+	combinedPools := &models.Pool{
+		Hashps:   bigOtherHashFloat.Text('f', -1),
+		PoolName: "其它",
+		Ratio:    strconv.FormatFloat(otherRadio, 'f', 4, 64),
+	}
+
+	savedPools = append(savedPools, combinedPools)
+
+	for _, pool := range savedPools {
+		// 检查数据库中是否已存在该矿池
+		var existingPool *models.Pool
+		if err := global.GormDB.Model(&models.Pool{}).Where("pool_name = ?", pool.PoolName).First(&existingPool).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// 不存在则插入
+				if err := global.GormDB.Create(pool).Error; err != nil {
+					log.Println("❌ 插入失败:", err)
+				} else {
+					//log.Println("✅ 插入成功:", pool.PoolName)
+				}
+			} else {
+				log.Println("❌ 查询出错:", err)
+			}
+		} else {
+			// 存在则更新
+			existingPool.Hashps = pool.Hashps
+			existingPool.Ratio = pool.Ratio
+			floatRadio, err := strconv.ParseFloat(existingPool.Ratio, 64)
+			if err != nil {
+				continue
+			}
+
+			//	pool.Price = pool.Ratio / (1 - pool.Profit)
+			//existingPool.Price = floatRadio / (1 - existingPool.Profit)
+			value := floatRadio / (1 - existingPool.Profit)
+			formattedValue := strconv.FormatFloat(value, 'f', 4, 64)       // 格式化为 4 位小数的字符串
+			existingPool.Price, _ = strconv.ParseFloat(formattedValue, 64) // 转回 float64
+
+			if err := global.GormDB.Save(&existingPool).Error; err != nil {
+				log.Println("❌ 更新失败:", err)
+			} else {
+				//log.Println("✅ 更新成功:", existingPool.PoolName)
+			}
+		}
+	}
+
+	//// 批量插入
+	//result := global.GormDB.Model(&models.Pool{}).Clauses(clause.OnConflict{
+	//	Columns:   []clause.Column{{Name: "pool_name"}},
+	//	DoUpdates: clause.AssignmentColumns([]string{"hashps", "ratio"}),
+	//}).Create(&savedPools)
+	//if result.Error != nil {
+	//	return fmt.Errorf("❌ 数据库写入失败: %v", result.Error)
+	//}
+	//
+	//log.Printf("✅ 成功插入 %d 条矿池数据", result.RowsAffected)
 
 	return nil
 }

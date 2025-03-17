@@ -8,7 +8,6 @@ import (
 	"pool/dao"
 	"pool/forms"
 	"pool/models"
-	"strconv"
 )
 
 type HashRateResponse struct {
@@ -63,20 +62,14 @@ func HashRate() ([]forms.HashRateResp, error) {
 	var pools []models.Pool
 
 	for _, pool := range response.Data.Data {
-		intCount, err := strconv.ParseInt(pool.Count, 10, 64)
-		if err != nil {
-			panic(err)
-		}
+		//intCount, err := strconv.ParseInt(pool.Count, 10, 64)
+		//if err != nil {
+		//	panic(err)
+		//}
 		newPool := models.Pool{
-			AvgFee:         pool.AvgFee,
-			AvgSize:        pool.AvgSize,
-			Count:          strconv.FormatInt(intCount, 10),
-			FeeRewardRatio: pool.FeeRewardRatio,
-			Hashps:         pool.Hashps,
-			OrphanCount:    pool.OrphanCount,
-			OrphanRatio:    pool.OrphanRatio,
-			PoolName:       pool.PoolName,
-			Ratio:          pool.Ratio,
+			Hashps:   pool.Hashps,
+			PoolName: pool.PoolName,
+			Ratio:    pool.Ratio,
 		}
 		pools = append(pools, newPool)
 	}
@@ -90,5 +83,33 @@ func HashRate() ([]forms.HashRateResp, error) {
 }
 
 func GetPools() (int64, []*models.Pool, error) {
-	return dao.GetPools()
+	totalPools, pools, err := dao.GetPools()
+	if err != nil {
+		return 0, nil, err
+	}
+
+	//var result []*models.Pool
+	//// 获取前7个
+	//result = append(result, pools[0:7]...)
+	//
+	//// 后面八个进行融合
+	//var otherHash = new(big.Float)
+	//otherHash.SetString("0") // 先初始化为 0，避免 nil
+	//var otherPrice float64
+	//for i := 8; i < int(totalPools); i++ {
+	//	bigFloat := new(big.Float)
+	//	bigFloat.SetString(pools[i].Hashps)
+	//	otherHash = new(big.Float).Add(otherHash, bigFloat)
+	//	otherPrice += pools[i].Price
+	//}
+	//
+	//otherPool := &models.Pool{
+	//	PoolName: "其它",
+	//	Price:    otherPrice,
+	//	Hashps:   otherHash.String(),
+	//}
+	//
+	//result = append(result, otherPool)
+
+	return totalPools, pools, nil
 }

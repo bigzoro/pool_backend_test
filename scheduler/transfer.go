@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"context"
-	"fmt"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/system"
@@ -73,13 +72,10 @@ func decodeSystemTransfer(tx *solana.Transaction) error {
 			if transferInst, ok := inst.Impl.(*system.Transfer); ok {
 				lamports := transferInst.Lamports
 				from := transferInst.Get(0)
-				to := transferInst.Get(1)
+				//to := transferInst.Get(1)
 				lamportsOnAccount := new(big.Float).SetUint64(*lamports)
 				solBalance := new(big.Float).Quo(lamportsOnAccount, new(big.Float).SetUint64(solana.LAMPORTS_PER_SOL))
-
-				fmt.Println("from: ", from)
-				fmt.Println("to: ", to)
-				fmt.Println("◎", solBalance.Text('f', 10))
+				formatBalance := solBalance.Text('f', 4)
 
 				// 保存到数据库
 				// todo: 判断接收地址是否正确
@@ -90,11 +86,14 @@ func decodeSystemTransfer(tx *solana.Transaction) error {
 				}
 
 				// 保存到数据库
-				transfer := &models.Transfer{
-					UserId: fromUserId,
-					Amount: *solBalance,
+				transfer := &models.RechargeRecord{
+					UserId:    fromUserId,
+					Amount:    formatBalance,
+					Address:   from.PublicKey.String(),
+					Signature: tx.Signatures[0].String(),
 				}
-				err = dao.AddTransfer(transfer)
+
+				err = dao.AddRechargeUnique(transfer)
 				if err != nil {
 					return err
 				}
@@ -140,7 +139,6 @@ func MonitorTransfer(ctx context.Context, wg *sync.WaitGroup) {
 			},
 		)
 		if err != nil {
-			log.SystemLog().Warnf("monitor transfer err:%v", err)
 			continue
 		}
 

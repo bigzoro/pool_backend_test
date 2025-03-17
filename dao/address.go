@@ -43,10 +43,10 @@ func DeleteAddress(ids []int64) error {
 	return nil
 }
 
-func GetUserIdByAddress(address string) (uint, error) {
-	var userId uint
+func GetUserIdByAddress(address string) (int, error) {
+	var userId int
 
-	result := global.GormDB.Where(&models.Addresses{Address: address}).First(&userId)
+	result := global.GormDB.Model(&models.Addresses{}).Where(&models.Addresses{Address: address}).Select("user_id").First(&userId)
 
 	if result.RowsAffected == 0 {
 		return 0, errors.New("用户不存在")

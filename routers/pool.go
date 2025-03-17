@@ -38,5 +38,13 @@ func InitPoolRouter(Router *gin.RouterGroup) {
 		// 谷歌
 		poolRouter.POST("get_google_auth_qr", api.GetGoogleAuthQR)
 		poolRouter.POST("verify_google_auth_code", api.VerifyGoogleAuthCode)
+
+		// 通知
+		poolRouter.POST("add_notice", api.AddNotice)
+		poolRouter.GET("get_show_notice", api.GetShowNotice)
+		poolRouter.POST("delete_notice", api.DeleteNotice)
+
+		// 充值
+		poolRouter.POST("user_recharge_record", api.GetRechargeRecordByUserId)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"pool/global"
 	"pool/models"
+	"time"
 )
 
 func GetBlocks() (int, []*models.Block, error) {
@@ -34,4 +35,29 @@ func GetBlockByPage(num, size int) ([]*models.Block, error) {
 	}
 
 	return blocks, nil
+}
+
+// 获取最接近0点的区块号
+func GetCloseZeroBlockNumber() (string, error) {
+	now := time.Now()
+	zeroTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	var closestBlock models.Block
+	result := global.GormDB.Model(&models.Block{}).Where("time > ?", zeroTime).Order("time ASC").First(&closestBlock)
+	if result.Error != nil {
+		return "", result.Error
+	}
+
+	return closestBlock.Height, nil
+}
+
+// 获取最新的区块
+func GetLatestBlockHeight() (int, error) {
+	var latestHeight int
+	result := global.GormDB.Model(&models.Block{}).Order("height ASC").Select("height").First(&latestHeight)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return latestHeight, nil
 }

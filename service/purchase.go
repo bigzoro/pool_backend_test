@@ -63,6 +63,7 @@ func AllPoolPurchaseNumber(poolName string) (map[string]float64, error) {
 			return nil, err
 		}
 
+		// 减去其它的份额
 		for k, v := range poolCount {
 			if k == pool.PoolName {
 				total -= v / pool.Price
@@ -73,6 +74,19 @@ func AllPoolPurchaseNumber(poolName string) (map[string]float64, error) {
 
 		availableNumber[pool.PoolName] = pool.Price * total
 	}
+
+	//var resultAvailableNumber = make(map[string]float64)
+	//
+	//var otherNumber float64
+	//for i := 0; i < len(pools); i++ {
+	//	if i < 8 {
+	//		resultAvailableNumber[pools[i].PoolName] = availableNumber[pools[i].PoolName]
+	//		continue
+	//	}
+	//	otherNumber += availableNumber[pools[i].PoolName]
+	//}
+	//
+	//resultAvailableNumber["其它"] = otherNumber
 
 	return availableNumber, nil
 }
