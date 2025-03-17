@@ -141,6 +141,16 @@ func saveBlockInfo(blocks []MockBlock) error {
 func StartBlockScheduler(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	blockInfo, err := fetchBlockInfo()
+	if err != nil {
+		log.Println("❌ 获取区块信息失败:", err)
+	} else {
+		err = saveBlockInfo(blockInfo)
+		if err != nil {
+			log.Printf("❌ 保存区块信息失败: %v", err)
+		}
+	}
+
 	ticker := time.NewTicker(syncInterval)
 	defer ticker.Stop()
 

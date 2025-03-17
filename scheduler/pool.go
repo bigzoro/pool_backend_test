@@ -183,6 +183,16 @@ func savePoolInfo(pools []*models.Pool) error {
 func StartPoolScheduler(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	poolInfo, err := fetchPoolInfo()
+	if err != nil {
+		log.Println("❌ 获取矿池信息失败:", err)
+	} else {
+		err = savePoolInfo(poolInfo)
+		if err != nil {
+			log.Printf("❌ 保存矿池信息失败: %v", err)
+		}
+	}
+
 	ticker := time.NewTicker(syncInterval)
 	defer ticker.Stop()
 
